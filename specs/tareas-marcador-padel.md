@@ -13,7 +13,8 @@ Guía operativa para implementar la especificación [`marcador-padel.md`](./marc
 | Lógica de negocio | `app/domain/PartidoPadel.ts` |
 | Tests unitarios | `test/unit/partido-padel.test.ts` |
 | Helpers de test (opcional) | `test/unit/helpers/partido.ts` |
-| UI | `app/pages/index.vue` (o componente dedicado) |
+| UI | `app/components/MarcadorPadel.vue` (`app/pages/index.vue` orquesta) |
+| Composable | `app/composables/useMarcador.ts` |
 | Tests de UI | `test/integration/marcador.test.ts` |
 
 ---
@@ -39,8 +40,9 @@ Una tarea está terminada solo si:
 2. Acordar un API mínimo antes de codear, por ejemplo:
    - `new PartidoPadel()`
    - `punto('J1' | 'J2')`
-   - getters o `getMarcador()` con: puntos J1/J2, juegos, sets, `enTieBreak`, `ganador`
-3. Anotar en este archivo o en un comentario del test el formato de puntos visibles: `'0' | '15' | '30' | '40' | 'Deuce' | 'Ventaja J1' | 'Ventaja J2'` (o equivalente).
+   - `resetear()` — vuelve al estado inicial y desbloquea el marcador
+   - getters o `getMarcador()` con: puntos J1/J2, juegos, sets, `enTieBreak`, `ganador`, `setsAnteriores`
+3. Anotar en este archivo o en un comentario del test el formato de puntos visibles: `'0' | '15' | '30' | '40' | 'Deuce' | 'Ventaja J1' | 'Ventaja J2'` (o equivalente). En tie-break: `'0' | '1' | '2' | …`.
 
 **No hacer aún:** implementar la clase ni escribir lógica real.
 
@@ -226,6 +228,7 @@ expect(partido.puntos).toEqual({ j1: '15', j2: '0' })
 
 1. Diseñar en `app/pages/index.vue` (o `app/components/MarcadorPadel.vue`) una pantalla móvil-first:
    - Botones grandes: **Punto J1** y **Punto J2**.
+   - Botón **Nuevo partido** (siempre habilitado).
    - Panel de puntos actuales.
    - Panel de juegos del set actual.
    - Panel de sets (actuales / anteriores si aplica).
@@ -242,11 +245,25 @@ expect(partido.puntos).toEqual({ j1: '15', j2: '0' })
 
 1. Instanciar `PartidoPadel` en el setup del componente (`ref` / `reactive` / composable `useMarcador`).
 2. Cada botón llama `punto('J1')` o `punto('J2')` y el template lee el marcador reactivo.
-3. Mostrar ganador y deshabilitar botones si el partido terminó.
+3. Mostrar ganador y deshabilitar botones de punto si el partido terminó.
 4. **Test de integración (recomendado):** en `test/integration/marcador.test.ts`, montar el componente, click en Punto J1, esperar texto `15` / `15-0`.
 5. Correr `pnpm test:unit` y `pnpm test:integration`.
 
 **Hecho cuando:** la UI solo orquesta la clase ya testeada; un click refleja la lógica real.
+
+---
+
+### Tarea 3.4 — Nuevo partido (`resetear`)
+
+**Qué hacer:**
+
+1. **Test:** con un partido ganado (o en curso), `resetear()` deja puntos `0-0`, juegos `0-0`, sets `0-0`, `enTieBreak === false`, `ganador === null` y `setsAnteriores` vacío.
+2. **Test:** tras `resetear()`, `punto('J2')` vuelve a cambiar el marcador (`0-15`).
+3. Implementar `PartidoPadel.resetear()` sin lógica en el template.
+4. El botón **Nuevo partido** llama a `resetear()` (vía `useMarcador`) y refresca el marcador.
+5. **Test de integración:** click en Punto J1 y luego en Nuevo partido → puntos `0-0`.
+
+**Hecho cuando:** se puede empezar un partido nuevo desde cualquier estado, incluido con ganador.
 
 ---
 
@@ -267,6 +284,7 @@ Copia y marca conforme avances:
 - [ ] 3.1 Ganar partido + bloqueo
 - [ ] 3.2 Maquetación UI
 - [ ] 3.3 Conectar UI + test integración
+- [ ] 3.4 Nuevo partido (`resetear`)
 
 ---
 
@@ -285,5 +303,5 @@ pnpm test               # todo
 
 - Un test nuevo debe fallar por **una** razón clara.
 - Si un test de set es ilegible, vuelve a la tarea 2.0 (helpers).
-- No mezcles UI (3.2–3.3) con bugs de dominio: si el click falla, primero mira `pnpm test:unit`.
+- No mezcles UI (3.2–3.4) con bugs de dominio: si el click falla, primero mira `pnpm test:unit`.
 - Preferir asertar el **marcador visible**, no contadores internos privados.

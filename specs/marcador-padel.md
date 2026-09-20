@@ -8,7 +8,7 @@ Una aplicación web móvil/desktop para llevar la puntuación en vivo de partido
 - la suma de juegos
 - la resolución de los sets
 
-Incluyendo la lógica de **ventajas**, **diferencia de dos juegos** y el **tie-break**.
+Incluyendo la lógica de **ventajas**, **diferencia de dos juegos**, el **tie-break** y la opción de **empezar un partido nuevo**.
 
 ---
 
@@ -35,6 +35,13 @@ Incluyendo la lógica de **ventajas**, **diferencia de dos juegos** y el **tie-b
 
 - El partido se juega al **mejor de 3 sets**.
 - El primero que gane **2 sets** gana el partido.
+- Con ganador, el marcador **se bloquea**: no se aceptan más puntos.
+
+### Nuevo partido
+
+- En cualquier momento (incluido con partido terminado) se puede **resetear** el marcador.
+- El partido vuelve al estado inicial: puntos `0-0`, juegos `0-0`, sets `0-0`, sin tie-break, sin ganador y sin sets anteriores.
+- Tras el reset, se vuelven a aceptar puntos.
 
 ---
 
@@ -98,8 +105,14 @@ Para hacer TDD real, **no se programa nada de la app hasta tener la prueba escri
 **Descripción:** Diseñar una pantalla limpia (ideal para móviles) con:
 
 - dos botones gigantes (`Punto J1`, `Punto J2`)
+- un botón `Nuevo partido` para resetear el marcador
 - paneles para mostrar el Set Actual, los Sets Anteriores y los Puntos actuales
 
 #### Tarea 3.3 — Conectar la UI con la lógica de negocio
 
 **Descripción:** Hacer que los botones disparen los métodos de la clase `PartidoPadel` (probada en las fases anteriores) y actualicen el texto de la pantalla.
+
+#### Tarea 3.4 — TDD para Nuevo partido
+
+- **Prueba:** Tras un partido en curso o ya ganado, `resetear()` deja el marcador en `0-0` (puntos, juegos y sets), limpia ganador y sets anteriores, y vuelve a aceptar puntos.
+- **UI:** el botón `Nuevo partido` llama a `resetear()` y refresca el marcador.

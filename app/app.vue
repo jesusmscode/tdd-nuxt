@@ -11,8 +11,8 @@ useHead({
   }
 })
 
-const title = 'Nuxt Starter Template'
-const description = 'A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours.'
+const title = 'Marcador de pádel'
+const description = 'Anota puntos, juegos y sets de un partido de pádel al mejor de tres.'
 
 useSeoMeta({
   title,
