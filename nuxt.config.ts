@@ -12,6 +12,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  vite: {
+    resolve: {
+      dedupe: ['vue']
+    }
+  },
+
   routeRules: {
     '/': { prerender: true }
   },
