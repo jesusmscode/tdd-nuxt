@@ -182,8 +182,8 @@ export class PartidoPadel {
     }
 
     return {
-      t1: PUNTOS_JUEGO[Math.min(t1, 3)],
-      t2: PUNTOS_JUEGO[Math.min(t2, 3)]
+      t1: puntoDeJuego(t1),
+      t2: puntoDeJuego(t2)
     }
   }
 
@@ -421,7 +421,7 @@ export class PartidoPadel {
       ? this.#historialSaques.length % 4
       : (orden.indexOf(this.#sacador) + 1) % orden.length
 
-    this.#sacador = orden[indice]
+    this.#sacador = orden[indice] ?? this.#sacador
   }
 
   #capturarEstado(): EstadoPartido {
@@ -462,6 +462,10 @@ export class PartidoPadel {
     const total = this.#puntos.t1 + this.#puntos.t2
     this.#avisoCambioDeLado = total > 0 && total % 6 === 0
   }
+}
+
+function puntoDeJuego(puntos: number): PuntoVisible {
+  return PUNTOS_JUEGO[Math.min(Math.max(puntos, 0), 3)] ?? '0'
 }
 
 function clave(team: Team): 't1' | 't2' {
