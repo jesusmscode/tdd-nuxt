@@ -45,6 +45,7 @@ export type MarcadorPadel = {
   juegos: { t1: number, t2: number }
   sets: { t1: number, t2: number }
   enTieBreak: boolean
+  enSuperTieBreak: boolean
   ganador: Team | null
   setsAnteriores: { t1: number, t2: number }[]
   modo: ModoPuntuacion
@@ -66,6 +67,7 @@ type EstadoPartido = {
   juegos: { t1: number, t2: number }
   sets: { t1: number, t2: number }
   enTieBreak: boolean
+  enSuperTieBreak: boolean
   ganador: Team | null
   setsAnteriores: { t1: number, t2: number }[]
   iniciado: boolean
@@ -79,6 +81,7 @@ export class PartidoPadel {
   #juegos = { t1: 0, t2: 0 }
   #sets = { t1: 0, t2: 0 }
   #enTieBreak = false
+  #enSuperTieBreak = false
   #ganador: Team | null = null
   #setsAnteriores: { t1: number, t2: number }[] = []
   #modo: ModoPuntuacion
@@ -104,6 +107,7 @@ export class PartidoPadel {
     this.#juegos = { t1: 0, t2: 0 }
     this.#sets = { t1: 0, t2: 0 }
     this.#enTieBreak = false
+    this.#enSuperTieBreak = false
     this.#ganador = null
     this.#setsAnteriores = []
     this.#iniciado = false
@@ -134,6 +138,14 @@ export class PartidoPadel {
     this.#avisoCambioDeLado = false
     this.#puntos[clave(team)]++
 
+    if (this.#enSuperTieBreak) {
+      this.#resolverSuperTieBreak()
+      if (this.#enSuperTieBreak) {
+        this.#avisarCambioEnTieBreak()
+      }
+      return
+    }
+
     if (this.#enTieBreak) {
       this.#resolverTieBreak()
       if (this.#enTieBreak) {
@@ -146,7 +158,7 @@ export class PartidoPadel {
   }
 
   get puntos(): MarcadorPadel['puntos'] {
-    if (this.#enTieBreak) {
+    if (this.#enTieBreak || this.#enSuperTieBreak) {
       return {
         t1: String(this.#puntos.t1) as PuntoVisible,
         t2: String(this.#puntos.t2) as PuntoVisible
@@ -187,6 +199,10 @@ export class PartidoPadel {
     return this.#enTieBreak
   }
 
+  get enSuperTieBreak() {
+    return this.#enSuperTieBreak
+  }
+
   get ganador() {
     return this.#ganador
   }
@@ -212,6 +228,7 @@ export class PartidoPadel {
       || this.#sets.t1 > 0
       || this.#sets.t2 > 0
       || this.#enTieBreak
+      || this.#enSuperTieBreak
       || this.#ganador !== null
       || this.#setsAnteriores.length > 0
   }
@@ -283,6 +300,7 @@ export class PartidoPadel {
       juegos: this.juegos,
       sets: this.sets,
       enTieBreak: this.enTieBreak,
+      enSuperTieBreak: this.enSuperTieBreak,
       ganador: this.ganador,
       setsAnteriores: this.setsAnteriores,
       modo: this.modo,
@@ -336,6 +354,28 @@ export class PartidoPadel {
     }
   }
 
+  #resolverSuperTieBreak() {
+    const { t1, t2 } = this.#puntos
+
+    if (t1 >= 10 && t1 - t2 >= 2) {
+      this.#ganarSuperTieBreak('T1')
+    } else if (t2 >= 10 && t2 - t1 >= 2) {
+      this.#ganarSuperTieBreak('T2')
+    }
+  }
+
+  #ganarSuperTieBreak(team: Team) {
+    this.#anotarSaqueYRotar()
+    this.#avisoCambioDeLado = (this.#puntos.t1 + this.#puntos.t2) % 6 === 0
+    this.#setsAnteriores.push({ ...this.#puntos })
+    this.#sets[clave(team)]++
+    this.#juegos = { t1: 0, t2: 0 }
+    this.#puntos = { t1: 0, t2: 0 }
+    this.#enSuperTieBreak = false
+    this.#enTieBreak = false
+    this.#ganador = team
+  }
+
   #resolverTieBreak() {
     const { t1, t2 } = this.#puntos
 
@@ -358,11 +398,14 @@ export class PartidoPadel {
     this.#juegos = { t1: 0, t2: 0 }
     this.#puntos = { t1: 0, t2: 0 }
     this.#enTieBreak = false
+    this.#enSuperTieBreak = false
 
     if (this.#sets.t1 >= 2) {
       this.#ganador = 'T1'
     } else if (this.#sets.t2 >= 2) {
       this.#ganador = 'T2'
+    } else if (this.#sets.t1 === 1 && this.#sets.t2 === 1) {
+      this.#enSuperTieBreak = true
     }
   }
 
@@ -387,6 +430,7 @@ export class PartidoPadel {
       juegos: { ...this.#juegos },
       sets: { ...this.#sets },
       enTieBreak: this.#enTieBreak,
+      enSuperTieBreak: this.#enSuperTieBreak,
       ganador: this.#ganador,
       setsAnteriores: this.#setsAnteriores.map(set => ({ ...set })),
       iniciado: this.#iniciado,
@@ -401,6 +445,7 @@ export class PartidoPadel {
     this.#juegos = { ...estado.juegos }
     this.#sets = { ...estado.sets }
     this.#enTieBreak = estado.enTieBreak
+    this.#enSuperTieBreak = estado.enSuperTieBreak
     this.#ganador = estado.ganador
     this.#setsAnteriores = estado.setsAnteriores.map(set => ({ ...set }))
     this.#iniciado = estado.iniciado

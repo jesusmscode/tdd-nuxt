@@ -12,14 +12,14 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  routeRules: {
+    '/': { prerender: true }
+  },
+
   vite: {
     resolve: {
       dedupe: ['vue']
     }
-  },
-
-  routeRules: {
-    '/': { prerender: true }
   },
 
   compatibilityDate: '2026-06-30',

@@ -188,6 +188,30 @@ describe('marcador de pádel', () => {
 
     expect(wrapper.find('[data-testid="cambio-de-lado"]').exists()).toBe(false)
   })
+
+  it('entra en super tie-break al ir 1-1 y gana el partido a 10', async () => {
+    const wrapper = await mountSuspended(MarcadorPadel)
+    await empezarPartido(wrapper)
+    const puntoT1 = wrapper.get('[data-testid="punto-t1"]')
+    const puntoT2 = wrapper.get('[data-testid="punto-t2"]')
+
+    for (let i = 0; i < 24; i++) {
+      await puntoT1.trigger('click')
+    }
+    for (let i = 0; i < 24; i++) {
+      await puntoT2.trigger('click')
+    }
+
+    expect(wrapper.get('[data-testid="sets"]').text()).toBe('1 – 1')
+    expect(wrapper.get('[data-testid="estado-super-tie-break"]').text()).toContain('Super tie-break')
+
+    for (let i = 0; i < 10; i++) {
+      await puntoT1.trigger('click')
+    }
+
+    expect(wrapper.get('[data-testid="ganador"]').text()).toContain('Team 1')
+    expect(wrapper.get('[data-testid="sets"]').text()).toBe('2 – 1')
+  })
 })
 
 async function empezarPartido(wrapper: { get: (selector: string) => { trigger: (event: string) => Promise<unknown> } }) {

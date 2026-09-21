@@ -33,9 +33,22 @@ const etiquetaModo = computed(() =>
 const enBolaDeOro40 = computed(() =>
   marcador.value.modo === 'bolaDeOro'
   && !marcador.value.enTieBreak
+  && !marcador.value.enSuperTieBreak
   && marcador.value.puntos.t1 === '40'
   && marcador.value.puntos.t2 === '40'
 )
+
+const etiquetaPuntos = computed(() => {
+  if (marcador.value.enSuperTieBreak) {
+    return '(super tie-break)'
+  }
+
+  if (marcador.value.enTieBreak) {
+    return '(tie-break)'
+  }
+
+  return 'del juego'
+})
 
 const opcionesBloqueadas = computed(() => marcador.value.enCurso)
 
@@ -277,6 +290,15 @@ function nuevoPartido() {
     />
 
     <UAlert
+      v-else-if="marcador.enSuperTieBreak"
+      color="warning"
+      variant="subtle"
+      title="Super tie-break"
+      description="Tercer set a 10 puntos correlativos. Hace falta diferencia de 2."
+      data-testid="estado-super-tie-break"
+    />
+
+    <UAlert
       v-else-if="marcador.enTieBreak"
       color="warning"
       variant="subtle"
@@ -287,7 +309,7 @@ function nuevoPartido() {
 
     <section class="rounded-xl bg-elevated p-4">
       <h2 class="mb-3 text-sm font-medium text-muted">
-        Puntos {{ marcador.enTieBreak ? '(tie-break)' : 'del juego' }}
+        Puntos {{ etiquetaPuntos }}
       </h2>
       <div class="grid grid-cols-2 gap-3 text-center">
         <div>

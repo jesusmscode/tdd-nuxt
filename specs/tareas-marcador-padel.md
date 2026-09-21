@@ -319,6 +319,7 @@ Copia y marca conforme avances:
 - [ ] 3.4 Nuevo partido (`resetear`)
 - [x] 3.5 Bola de oro vs ventaja tradicional
 - [x] 3.6 Deshacer último punto
+- [x] 3.7 Super tie-break a 10 en el tercer set
 
 ---
 

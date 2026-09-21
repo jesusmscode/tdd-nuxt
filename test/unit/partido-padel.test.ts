@@ -263,7 +263,7 @@ describe('PartidoPadel', () => {
       expect(partido.sets).toEqual({ t1: 2, t2: 0 })
     })
 
-    it('continúa con 1-1 en sets', () => {
+    it('continúa con 1-1 en sets y entra en super tie-break a 10', () => {
       const partido = new PartidoPadel()
 
       ganarSet(partido, 'T1')
@@ -271,6 +271,8 @@ describe('PartidoPadel', () => {
 
       expect(partido.ganador).toBeNull()
       expect(partido.sets).toEqual({ t1: 1, t2: 1 })
+      expect(partido.enSuperTieBreak).toBe(true)
+      expect(partido.puntos).toEqual({ t1: '0', t2: '0' })
     })
 
     it('bloquea el marcador cuando el partido ya tiene ganador', () => {
@@ -298,6 +300,7 @@ describe('PartidoPadel', () => {
         juegos: { t1: 0, t2: 0 },
         sets: { t1: 0, t2: 0 },
         enTieBreak: false,
+        enSuperTieBreak: false,
         ganador: null,
         setsAnteriores: [],
         modo: 'ventaja',
@@ -392,6 +395,7 @@ describe('PartidoPadel', () => {
         juegos: { t1: 0, t2: 0 },
         sets: { t1: 0, t2: 0 },
         enTieBreak: false,
+        enSuperTieBreak: false,
         ganador: null,
         setsAnteriores: [],
         modo: 'bolaDeOro',
@@ -649,6 +653,90 @@ describe('PartidoPadel', () => {
     it('avisa cada 6 puntos en el tie-break', () => {
       const partido = new PartidoPadel()
       ganarJuegos(partido, 6, 6)
+      llevarA(partido, 5, 0)
+
+      partido.punto('T1')
+      expect(partido.avisoCambioDeLado).toBe(true)
+
+      partido.punto('T2')
+      expect(partido.avisoCambioDeLado).toBe(false)
+    })
+  })
+
+  describe('super tie-break (tercer set)', () => {
+    it('cuenta puntos correlativos y no cierra a 10-9', () => {
+      const partido = new PartidoPadel()
+      ganarSet(partido, 'T1')
+      ganarSet(partido, 'T2')
+      llevarA(partido, 9, 9)
+
+      partido.punto('T1')
+
+      expect(partido.enSuperTieBreak).toBe(true)
+      expect(partido.ganador).toBeNull()
+      expect(partido.puntos).toEqual({ t1: '10', t2: '9' })
+      expect(partido.sets).toEqual({ t1: 1, t2: 1 })
+    })
+
+    it('gana el partido al llegar a 10 con diferencia de 2', () => {
+      const partido = new PartidoPadel()
+      ganarSet(partido, 'T1')
+      ganarSet(partido, 'T2')
+      llevarA(partido, 9, 8)
+
+      partido.punto('T1')
+
+      expect(partido.ganador).toBe('T1')
+      expect(partido.enSuperTieBreak).toBe(false)
+      expect(partido.sets).toEqual({ t1: 2, t2: 1 })
+      expect(partido.setsAnteriores[2]).toEqual({ t1: 10, t2: 8 })
+    })
+
+    it('cierra 11-9 si hace falta diferencia de 2', () => {
+      const partido = new PartidoPadel()
+      ganarSet(partido, 'T1')
+      ganarSet(partido, 'T2')
+      llevarA(partido, 9, 9)
+      partido.punto('T1')
+
+      expect(partido.ganador).toBeNull()
+      expect(partido.puntos).toEqual({ t1: '10', t2: '9' })
+
+      partido.punto('T1')
+
+      expect(partido.ganador).toBe('T1')
+      expect(partido.setsAnteriores[2]).toEqual({ t1: 11, t2: 9 })
+    })
+
+    it('no entra en super tie-break si un equipo gana 2-0', () => {
+      const partido = new PartidoPadel()
+      ganarSet(partido, 'T1')
+      ganarSet(partido, 'T1')
+
+      expect(partido.enSuperTieBreak).toBe(false)
+      expect(partido.ganador).toBe('T1')
+    })
+
+    it('deshace el punto que cerró el super tie-break', () => {
+      const partido = new PartidoPadel()
+      ganarSet(partido, 'T1')
+      ganarSet(partido, 'T2')
+      llevarA(partido, 10, 0)
+
+      expect(partido.ganador).toBe('T1')
+
+      partido.deshacer()
+
+      expect(partido.ganador).toBeNull()
+      expect(partido.enSuperTieBreak).toBe(true)
+      expect(partido.puntos).toEqual({ t1: '9', t2: '0' })
+      expect(partido.sets).toEqual({ t1: 1, t2: 1 })
+    })
+
+    it('avisa cada 6 puntos en el super tie-break', () => {
+      const partido = new PartidoPadel()
+      ganarSet(partido, 'T1')
+      ganarSet(partido, 'T2')
       llevarA(partido, 5, 0)
 
       partido.punto('T1')

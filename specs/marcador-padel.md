@@ -8,7 +8,7 @@ Una aplicación web móvil/desktop para llevar la puntuación en vivo de partido
 - la suma de juegos
 - la resolución de los sets
 
-Incluyendo la lógica de **ventajas** o **bola de oro** (configurable), **duración del partido** (60 o 90 min) con **cronómetro**, **nombres y saque**, **deshacer último punto**, **aviso de cambio de lado**, **diferencia de dos juegos**, el **tie-break** y la opción de **empezar un partido nuevo**.
+Incluyendo la lógica de **ventajas** o **bola de oro** (configurable), **duración del partido** (60 o 90 min) con **cronómetro**, **nombres y saque**, **deshacer último punto**, **aviso de cambio de lado**, **diferencia de dos juegos**, el **tie-break** a 7, el **super tie-break a 10** en el tercer set y la opción de **empezar un partido nuevo**.
 
 ---
 
@@ -53,13 +53,20 @@ Incluyendo la lógica de **ventajas** o **bola de oro** (configurable), **duraci
 ### Cambio de lado
 
 - Al terminar un juego, si la **suma de juegos del set es impar** (1, 3, 5, 7…), se muestra **Cambio de lado**.
-- En el **tie-break**, se avisa cada **6 puntos**.
+- En el **tie-break** y el **super tie-break**, se avisa cada **6 puntos**.
 - El aviso se oculta al anotar el siguiente punto (o al deshacer).
 
 ### Tie-break
 
 - Si el set llega a `6-6`, se juega un juego especial a **7 puntos correlativos** (`1`, `2`, `3`...).
 - Debe haber **diferencia de 2** para definir el ganador del set (ej: `7-6`).
+
+### Super tie-break (tercer set)
+
+- Si el partido va **1-1**, el tercer set se juega como **super tie-break a 10 puntos correlativos** (`1`, `2`, `3`…), no como un set de juegos.
+- Hace falta **diferencia de 2** (ej: `10-8`; `10-9` no cierra, sí `11-9`).
+- Quien lo gana se lleva el set y el partido (2-1). El resultado del super tie-break queda en sets anteriores (ej: `10-8`).
+- Si un equipo gana **2-0**, no hay super tie-break.
 
 ### Sets
 
