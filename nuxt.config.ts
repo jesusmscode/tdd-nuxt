@@ -16,13 +16,13 @@ export default defineNuxtConfig({
     '/': { prerender: true }
   },
 
+  compatibilityDate: '2026-06-30',
+
   vite: {
     resolve: {
       dedupe: ['vue']
     }
   },
-
-  compatibilityDate: '2026-06-30',
 
   typescript: {
     tsConfig: {
